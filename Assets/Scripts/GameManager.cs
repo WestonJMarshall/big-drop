@@ -5,6 +5,7 @@ using UnityEngine;
 public struct GameStateVariables
 {
     public float GameTime { get; set; }
+    public int GameState { get; set; } // 0 = main menu, 1 = game, 2 = game over
     public int CompletedBlockCount { get; set; }
     public DropCube CurrentCube { get; set; }
     public Vector3 DropLocation { get; set; }
@@ -18,7 +19,11 @@ public class GameManager : MonoBehaviour
 
     private GameStateVariables gameVariables;
 
+    private bool newLerp = false;
+    private float top = 0.0f;
+
     public GameObject cubePrefab;
+    public Material sharedCubeMaterial;
 
     private void Awake()
     {
@@ -35,10 +40,13 @@ public class GameManager : MonoBehaviour
         gameVariables = new GameStateVariables
         {
             GameTime = 0.0f,
+            GameState = 1,
             CompletedBlockCount = 0,
             CurrentCube = null,
             DropLocation = new Vector3(0, 62, 100),
         };
+
+        top = Camera.main.transform.position.y;
     }
 
     private void Start()
@@ -48,7 +56,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (gameVariables.CurrentCube == null)
+        if (gameVariables.CurrentCube == null || gameVariables.GameState != 1)
             return;
 
         //Only check cube functions on current cube
@@ -79,9 +87,15 @@ public class GameManager : MonoBehaviour
 
         //Only run special cube movement on current cube
         if (gameVariables.CurrentCube.Falling)
-        {
             gameVariables.CurrentCube.BlockFallingMovement();
 
+        if (!newLerp)
+        {
+            Vector3 viewPoint = new Vector3(gameVariables.CurrentCube.transform.position.x,
+            gameVariables.CurrentCube.transform.position.y - 15.0f,
+            gameVariables.CurrentCube.transform.position.z);
+
+            Camera.main.transform.rotation = Quaternion.LookRotation(viewPoint - Camera.main.transform.position, Camera.main.transform.up);
         }
     }
 
@@ -111,6 +125,7 @@ public class GameManager : MonoBehaviour
         Vector3 yDistIncrement = new Vector3(0, gameVariables.CurrentCube.transform.localScale.y, 0);
         gameVariables.DropLocation += yDistIncrement;
         StartCoroutine(nameof(LerpCameraPositionY), Camera.main.transform.position.y + yDistIncrement.y);
+        newLerp = true;
 
         SpawnCube();
     }
@@ -121,15 +136,31 @@ public class GameManager : MonoBehaviour
     private void GameOver(object sender, System.EventArgs e)
     {
         Debug.Log("Game Over");
+
+        gameVariables.GameState = 2;
+
+        newLerp = true;
+        Camera.main.transform.rotation = Quaternion.LookRotation(new Vector3(0, 4.3f, 100.0f) - Camera.main.transform.position, Camera.main.transform.up);
     }
 
+    /// <summary>
+    /// Will lerp the camera to a specified y value
+    /// </summary>
+    /// <param name="pos">the y position camera will lerp to</param>
     public IEnumerator LerpCameraPositionY(float pos)
     {
         yield return new WaitForEndOfFrame();
 
-        Camera.main.transform.position = new Vector3(Camera.main.transform.position.x,
+        Vector3 lerpCameraPosition = new Vector3(Camera.main.transform.position.x,
             Camera.main.transform.position.y - ((Camera.main.transform.position.y - pos) * 0.015f),
             Camera.main.transform.position.z);
+
+        Vector3 lerpBlockPosition = new Vector3(gameVariables.CurrentCube.transform.position.x,
+            gameVariables.CurrentCube.transform.position.y - 15.0f,
+            gameVariables.CurrentCube.transform.position.z);
+
+        Camera.main.transform.rotation = Quaternion.LookRotation((((lerpBlockPosition - Camera.main.transform.position).normalized * 0.0175f) + (Camera.main.transform.forward)) / 2.0f, Camera.main.transform.up);
+        Camera.main.transform.position = lerpCameraPosition;
 
         if (Mathf.Abs(Camera.main.transform.position.y - pos) < 0.1f)
         {
@@ -137,6 +168,10 @@ public class GameManager : MonoBehaviour
             Camera.main.transform.position.x,
             pos,
             Camera.main.transform.position.z);
+
+            top = Camera.main.transform.position.y;
+
+            newLerp = false;
         }
         else
         {

@@ -11,35 +11,75 @@ public class DropCube : MonoBehaviour
 
     public GameObject mouseEffect;
 
+    #region Private Variables
+    [SerializeField]
+    private bool functioning = true;
+
     [Header("Block Falling Properties")]
     [SerializeField]
-    private float swaySpeed = 0.5f;
+    private float swaySpeedMax = 2.5f;
+    [SerializeField]
+    private float swaySpeedMin = 0.7f;
 
     [SerializeField]
-    private float swayDuration = 2.0f;
+    private float swayDurationMax = 4.5f;
+    [SerializeField]
+    private float swayDurationMin = 1.9f;
 
     [SerializeField]
-    private float fallSpeedMultiplier = 1.015f;
+    private float fallSpeedMultiplierMax = 1.002f;
+    [SerializeField]
+    private float fallSpeedMultiplierMin = 0.9985f;
+
+    [SerializeField]
+    private Vector3 cubeSizeMax = new Vector3(17.5f,10.5f, 17.5f);
+    [SerializeField]
+    private Vector3 cubeSizeMin = new Vector3(12.5f, 5.5f, 12.5f);
 
     private Rigidbody rb;
+    private float previousFrameY = 0.0f;
     private float restTimer = 0.0f;
     private float swapTimer = 0.0f;
     private bool rlSwap = false;
 
+    private float swaySpeed = 2.5f;
+    private float swayDuration = 2.0f;
+    private float fallSpeedMultiplier = 1.015f;
+    private Vector3 cubeSize = new Vector3(15, 10, 15);
+    #endregion
+
+    private float FrameHeightChange => Mathf.Abs(previousFrameY - transform.position.y);
     public bool Falling { get; set; }
 
     private void Awake()
     {
+        if (!functioning)
+            return;
+
         Falling = true;
         rb = GetComponentInChildren<Rigidbody>();
 
-        swaySpeed = UnityEngine.Random.Range(0.7f, 2.5f);
-        swayDuration = UnityEngine.Random.Range(1.9f, 4.5f);
-        fallSpeedMultiplier = UnityEngine.Random.Range(0.9985f, 1.002f);
+        swaySpeed = UnityEngine.Random.Range(swaySpeedMin, swaySpeedMax);
+        swayDuration = UnityEngine.Random.Range(swayDurationMin, swayDurationMax);
+        fallSpeedMultiplier = UnityEngine.Random.Range(fallSpeedMultiplierMin, fallSpeedMultiplierMax);
+
+        transform.localScale = new Vector3(
+            UnityEngine.Random.Range(cubeSizeMin.x, cubeSizeMax.x),
+            UnityEngine.Random.Range(cubeSizeMin.y, cubeSizeMax.y),
+            UnityEngine.Random.Range(cubeSizeMin.z, cubeSizeMax.z));
 
         swapTimer = swayDuration / 2.0f;
+    }
 
-        //GetComponentInChildren<MeshRenderer>().material.color = Color.HSVToRGB((Time.time / 400.0f) % 1, 1, 1);
+    private void Start()
+    {
+        if (!functioning)
+            return;
+
+        previousFrameY = transform.position.y;
+
+        GetComponentInChildren<MeshRenderer>().material = GameManager.Instance.sharedCubeMaterial;
+        StartCoroutine(nameof(LerpColorChange), HsvData()[0] + 0.04f);
     }
 
     /// <summary>
@@ -48,7 +88,8 @@ public class DropCube : MonoBehaviour
     /// <returns>If the block has been static for long enough</returns>
     public bool IsBlockRested()
     {
-        restTimer = Convert.ToInt32(Mathf.Abs(rb.velocity.y) < 0.26f) * (restTimer + Time.deltaTime);
+        restTimer = Convert.ToInt32(FrameHeightChange < 0.01f) * (restTimer + Time.deltaTime);
+        previousFrameY = transform.position.y;
         return restTimer > 0.9f ? true : false;
     }
 
@@ -84,5 +125,26 @@ public class DropCube : MonoBehaviour
 
         if(collision.gameObject.GetComponentInChildren<DropCube>() == null) //This is game over
             OnFailure?.Invoke(this, null);
+    }
+
+    private float[] HsvData() 
+    { 
+        Color.RGBToHSV(GameManager.Instance.sharedCubeMaterial.color, out float h, out float s, out float v); return new float[3] { h, s, v }; 
+    }
+
+    public IEnumerator LerpColorChange(float hue)
+    {
+        yield return new WaitForEndOfFrame();
+
+        GameManager.Instance.sharedCubeMaterial.color = Color.HSVToRGB(HsvData()[0] + ((hue - HsvData()[0]) * 0.011f), HsvData()[1], HsvData()[2]);
+
+        if(hue - HsvData()[0] < 0.01f)
+        {
+            GameManager.Instance.sharedCubeMaterial.color = Color.HSVToRGB(hue, HsvData()[1], HsvData()[2]);
+        }
+        else
+        {
+            StartCoroutine(nameof(LerpColorChange), hue);
+        }
     }
 }

@@ -154,6 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cubePrefab: {fileID: 7088197140178698584, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9,
     type: 3}
+  sharedCubeMaterial: {fileID: 2100000, guid: 883a6517316adab44b45a58b34e64b64, type: 2}
 --- !u!4 &55246395
 Transform:
   m_ObjectHideFlags: 0
@@ -455,12 +456,12 @@ PrefabInstance:
     - target: {fileID: 7088197140178698595, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 25
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 7088197140178698595, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 25
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 7088197140178698595, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9,
         type: 3}
@@ -472,6 +473,41 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 66a46346eebc64641ac12a85a3f691d9, type: 2}
+    - target: {fileID: 7088197140178698599, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9,
+        type: 3}
+      propertyPath: cubeSizeMax.x
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088197140178698599, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9,
+        type: 3}
+      propertyPath: cubeSizeMin.x
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088197140178698599, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9,
+        type: 3}
+      propertyPath: cubeSizeMin.z
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088197140178698599, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9,
+        type: 3}
+      propertyPath: cubeSizeMax.z
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088197140178698599, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9,
+        type: 3}
+      propertyPath: cubeSizeMax.y
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088197140178698599, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9,
+        type: 3}
+      propertyPath: cubeSizeMin.y
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088197140178698599, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9,
+        type: 3}
+      propertyPath: functioning
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c2a08f0dabb5b8b4eb770bcf5a62f0d9, type: 3}
 --- !u!1 &1054131005
