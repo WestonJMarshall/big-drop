@@ -360,6 +360,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pauseMenuUI: {fileID: 39426867}
+  restartDelay: 1
 --- !u!1 &265005773
 GameObject:
   m_ObjectHideFlags: 0
