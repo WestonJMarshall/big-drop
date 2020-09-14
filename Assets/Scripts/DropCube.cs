@@ -79,6 +79,7 @@ public class DropCube : MonoBehaviour
         previousFrameY = transform.position.y;
 
         GetComponentInChildren<MeshRenderer>().material = GameManager.Instance.sharedCubeMaterial;
+        StopAllCoroutines();
         StartCoroutine(nameof(LerpColorChange), HsvData()[0] + 0.04f);
     }
 
@@ -96,6 +97,7 @@ public class DropCube : MonoBehaviour
     public void BlockRested()
     {
         OnBlockRested?.Invoke(this, null);
+        StopAllCoroutines();
     }
 
     /// <summary>
