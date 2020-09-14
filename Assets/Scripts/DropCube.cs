@@ -79,8 +79,7 @@ public class DropCube : MonoBehaviour
         previousFrameY = transform.position.y;
 
         GetComponentInChildren<MeshRenderer>().material = GameManager.Instance.sharedCubeMaterial;
-        StopAllCoroutines();
-        StartCoroutine(nameof(LerpColorChange), HsvData()[0] + 0.04f);
+        StartCoroutine(nameof(LerpColorChange), new Tuple<float,int>(HsvData()[0] + 0.04f, 0));
     }
 
     /// <summary>
@@ -134,19 +133,19 @@ public class DropCube : MonoBehaviour
         Color.RGBToHSV(GameManager.Instance.sharedCubeMaterial.color, out float h, out float s, out float v); return new float[3] { h, s, v }; 
     }
 
-    public IEnumerator LerpColorChange(float hue)
+    public IEnumerator LerpColorChange(Tuple<float, int> changeData)
     {
         yield return new WaitForEndOfFrame();
 
-        GameManager.Instance.sharedCubeMaterial.color = Color.HSVToRGB(HsvData()[0] + ((hue - HsvData()[0]) * 0.011f), HsvData()[1], HsvData()[2]);
+        GameManager.Instance.sharedCubeMaterial.color = Color.HSVToRGB(HsvData()[0] + ((changeData.Item1 - HsvData()[0]) * 0.011f), HsvData()[1], HsvData()[2]);
 
-        if(hue - HsvData()[0] < 0.01f)
+        if(changeData.Item1 - HsvData()[0] < 0.01f || changeData.Item2 > 50)
         {
-            GameManager.Instance.sharedCubeMaterial.color = Color.HSVToRGB(hue, HsvData()[1], HsvData()[2]);
+            GameManager.Instance.sharedCubeMaterial.color = Color.HSVToRGB(changeData.Item1, HsvData()[1], HsvData()[2]);
         }
         else
         {
-            StartCoroutine(nameof(LerpColorChange), hue);
+            StartCoroutine(nameof(LerpColorChange), new Tuple<float, int>(HsvData()[0] + 0.04f, changeData.Item2 + 1));
         }
     }
 }
