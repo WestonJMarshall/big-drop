@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     #endregion
 
-    private GameStateVariables gameVariables;
+    public GameStateVariables gameVariables;
 
     private bool newLerp = false;
     private float top = 0.0f;
@@ -102,7 +102,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Spawns a new drop cube at the current DropLocation
     /// </summary>
-    private void SpawnCube()
+    public void SpawnCube()
     {
         if (cubePrefab != null)
             gameVariables.CurrentCube = Instantiate(cubePrefab).GetComponent<DropCube>();
