@@ -38,6 +38,8 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(false);
         Time.timeScale = 1.0f;
         IsGamePaused = false;
+
+        GameManager.Instance.gameVariables.GameState = 1;
     }
 
     public void Pause()
@@ -45,24 +47,22 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(true);
         Time.timeScale = 0.0f;
         IsGamePaused = true;
+
+        GameManager.Instance.gameVariables.GameState = 0;
     }
 
     public void RestartDelay()
     {
+        Restart();
         Debug.Log("delay");
-        Invoke("Restart", restartDelay);
+        //Invoke("Restart", restartDelay);
     }
 
     private void Restart()
     {
         Debug.Log("restart");
+        GameManager.Instance.ResetVariables();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        //GameManager.gameVariables.GameTime = 0.0f;
-        //GameManager.gameVariables.GameState = 1;
-        //GameManager.gameVariables.CompletedBlockCount = 0;
-        //GameManager.gameVariables.CurrentCube = null;
-        //GameManager.gameVariables.DropLocation = new Vector3(0, 62, 100);
-        GameManager.SpawnCube();
         Time.timeScale = 1.0f;
         IsGamePaused = false;
     }

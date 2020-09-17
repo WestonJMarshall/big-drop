@@ -37,7 +37,7 @@ public class DropCube : MonoBehaviour
     private Vector3 cubeSizeMin = new Vector3(12.5f, 5.5f, 12.5f);
 
     private Rigidbody rb;
-    private float previousFrameY = 0.0f;
+    private Vector3 previousFramePos = Vector3.zero;
     private float restTimer = 0.0f;
     private float swapTimer = 0.0f;
     private bool rlSwap = false;
@@ -48,7 +48,7 @@ public class DropCube : MonoBehaviour
     private Vector3 cubeSize = new Vector3(15, 10, 15);
     #endregion
 
-    private float FrameHeightChange => Mathf.Abs(previousFrameY - transform.position.y);
+    private float FrameDistChange => Vector3.Distance(previousFramePos, transform.position);
     public bool Falling { get; set; }
 
     private void Awake()
@@ -76,7 +76,9 @@ public class DropCube : MonoBehaviour
         if (!functioning)
             return;
 
-        previousFrameY = transform.position.y;
+        previousFramePos = transform.position;
+
+        rlSwap = Convert.ToBoolean(UnityEngine.Random.Range(0, 2));
 
         GetComponentInChildren<MeshRenderer>().material = GameManager.Instance.sharedCubeMaterial;
         StartCoroutine(nameof(LerpColorChange), new Tuple<float,int>(HsvData()[0] + 0.04f, 0));
@@ -88,9 +90,9 @@ public class DropCube : MonoBehaviour
     /// <returns>If the block has been static for long enough</returns>
     public bool IsBlockRested()
     {
-        restTimer = Convert.ToInt32(FrameHeightChange < 0.01f) * (restTimer + Time.deltaTime);
-        previousFrameY = transform.position.y;
-        return restTimer > 0.9f ? true : false;
+        restTimer = Convert.ToInt32(FrameDistChange < 0.02f) * (restTimer + Time.deltaTime);
+        previousFramePos = transform.position;
+        return restTimer > 1.2f ? true : false;
     }
 
     public void BlockRested()
@@ -112,19 +114,23 @@ public class DropCube : MonoBehaviour
         }
 
         float forceX = rlSwap ? swaySpeed : -swaySpeed;
-        rb.AddForceAtPosition(new Vector3(forceX, 0, 0), transform.position - new Vector3(0, 0.2f, 0));
-
+        rb.AddForce(new Vector3(forceX, 0, 0), ForceMode.Force);
         rb.velocity = new Vector3(
             rb.velocity.x,
             rb.velocity.y / fallSpeedMultiplier,
             rb.velocity.z);
+
+        transform.rotation = Quaternion.Euler(0, 0, rb.velocity.x * 0.4f);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         Falling = false;
 
-        if(collision.gameObject.GetComponentInChildren<DropCube>() == null) //This is game over
+        if (collision.gameObject.GetComponentInChildren<DropCube>() != null && GameManager.Instance.gameVariables.CompletedBlockCount > 0 && collision.transform.position.y < 5.0f)
+            OnFailure?.Invoke(this, null);
+
+        else if (collision.gameObject.GetComponentInChildren<DropCube>() == null) //This is game over
             OnFailure?.Invoke(this, null);
     }
 

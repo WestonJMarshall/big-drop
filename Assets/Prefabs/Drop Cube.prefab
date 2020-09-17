@@ -188,7 +188,7 @@ Rigidbody:
   m_GameObject: {fileID: 7088197140178698584}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 3
+  m_Drag: 6
   m_AngularDrag: 2
   m_UseGravity: 1
   m_IsKinematic: 0
@@ -209,11 +209,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mouseEffect: {fileID: 4867754074172256498}
   functioning: 1
-  swaySpeedMax: 2.5
-  swaySpeedMin: 0.7
-  swayDurationMax: 4.5
-  swayDurationMin: 1.9
-  fallSpeedMultiplierMax: 1.002
-  fallSpeedMultiplierMin: 0.9985
-  cubeSizeMax: {x: 17.5, y: 10.5, z: 17.5}
+  swaySpeedMax: 13
+  swaySpeedMin: 7
+  swayDurationMax: 4
+  swayDurationMin: 3
+  fallSpeedMultiplierMax: 1.004
+  fallSpeedMultiplierMin: 0.9989
+  cubeSizeMax: {x: 18, y: 10.5, z: 18}
   cubeSizeMin: {x: 12.5, y: 5.5, z: 12.5}

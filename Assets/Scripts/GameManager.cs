@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public struct GameStateVariables
 {
@@ -19,11 +21,14 @@ public class GameManager : MonoBehaviour
 
     public GameStateVariables gameVariables;
 
-    private bool newLerp = false;
+    private bool newLerpY = false;
+    private bool newLerpAngle = false;
     private float top = 0.0f;
 
     public GameObject cubePrefab;
     public Material sharedCubeMaterial;
+
+    private GameObject scoreCanvas;
 
     private void Awake()
     {
@@ -36,21 +41,14 @@ public class GameManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        //Setup Game Variables
-        gameVariables = new GameStateVariables
-        {
-            GameTime = 0.0f,
-            GameState = 1,
-            CompletedBlockCount = 0,
-            CurrentCube = null,
-            DropLocation = new Vector3(0, 62, 100),
-        };
-
-        top = Camera.main.transform.position.y;
+        SceneManager.sceneLoaded += StartScene;
     }
 
-    private void Start()
+    private void StartScene(Scene scene, LoadSceneMode mode)
     {
+        ResetVariables();
+        scoreCanvas = GameObject.FindGameObjectWithTag("ScoreCanvas");
+        scoreCanvas.GetComponentInChildren<TMP_Text>().text = $"Score: <color=#{ColorUtility.ToHtmlStringRGB(sharedCubeMaterial.color)}>{gameVariables.CompletedBlockCount}</color>";
         SpawnCube();
     }
 
@@ -89,7 +87,13 @@ public class GameManager : MonoBehaviour
         if (gameVariables.CurrentCube.Falling)
             gameVariables.CurrentCube.BlockFallingMovement();
 
-        if (!newLerp)
+        if (!newLerpY)
+        {
+            Vector3 viewPoint = new Vector3(gameVariables.CurrentCube.transform.position.x,
+            gameVariables.CurrentCube.transform.position.y - 15.0f,
+            gameVariables.CurrentCube.transform.position.z);
+        }
+        if(!newLerpAngle)
         {
             Vector3 viewPoint = new Vector3(gameVariables.CurrentCube.transform.position.x,
             gameVariables.CurrentCube.transform.position.y - 15.0f,
@@ -118,6 +122,7 @@ public class GameManager : MonoBehaviour
     private void TopBlockRested(object sender, System.EventArgs e)
     {
         gameVariables.CompletedBlockCount += 1;
+        scoreCanvas.GetComponentInChildren<TMP_Text>().text = $"Score: <color=#{ColorUtility.ToHtmlStringRGB(sharedCubeMaterial.color)}>{gameVariables.CompletedBlockCount}</color>";
         Debug.Log(gameVariables.CompletedBlockCount);
 
         gameVariables.CurrentCube.mouseEffect.SetActive(false);
@@ -125,8 +130,9 @@ public class GameManager : MonoBehaviour
         Vector3 yDistIncrement = new Vector3(0, gameVariables.CurrentCube.transform.localScale.y, 0);
         gameVariables.DropLocation += yDistIncrement;
         StartCoroutine(nameof(LerpCameraPositionY), Camera.main.transform.position.y + yDistIncrement.y);
-        newLerp = true;
-
+        StartCoroutine(nameof(LerpCameraAngle));
+        newLerpY = true;
+        newLerpAngle = true;
         SpawnCube();
     }
 
@@ -139,8 +145,28 @@ public class GameManager : MonoBehaviour
 
         gameVariables.GameState = 2;
 
-        newLerp = true;
+        newLerpY = true;
+        newLerpAngle = true;
         Camera.main.transform.rotation = Quaternion.LookRotation(new Vector3(0, 4.3f, 100.0f) - Camera.main.transform.position, Camera.main.transform.up);
+    }
+
+    public void ResetVariables()
+    {
+        StopAllCoroutines();
+
+        //Setup Game Variables
+        gameVariables = new GameStateVariables
+        {
+            GameTime = 0.0f,
+            GameState = 1,
+            CompletedBlockCount = 0,
+            CurrentCube = null,
+            DropLocation = new Vector3(0, 62, 100),
+        };
+
+        newLerpY = false;
+        newLerpAngle = false;
+        top = Camera.main.transform.position.y;
     }
 
     /// <summary>
@@ -155,11 +181,6 @@ public class GameManager : MonoBehaviour
             Camera.main.transform.position.y - ((Camera.main.transform.position.y - pos) * 0.015f),
             Camera.main.transform.position.z);
 
-        Vector3 lerpBlockPosition = new Vector3(gameVariables.CurrentCube.transform.position.x,
-            gameVariables.CurrentCube.transform.position.y - 15.0f,
-            gameVariables.CurrentCube.transform.position.z);
-
-        Camera.main.transform.rotation = Quaternion.LookRotation((((lerpBlockPosition - Camera.main.transform.position).normalized * 0.0175f) + (Camera.main.transform.forward)) / 2.0f, Camera.main.transform.up);
         Camera.main.transform.position = lerpCameraPosition;
 
         if (Mathf.Abs(Camera.main.transform.position.y - pos) < 0.1f)
@@ -171,11 +192,35 @@ public class GameManager : MonoBehaviour
 
             top = Camera.main.transform.position.y;
 
-            newLerp = false;
+            newLerpY = false;
         }
         else
         {
             StartCoroutine(nameof(LerpCameraPositionY), pos);
+        }
+    }
+
+    /// <summary>
+    /// Will lerp the camera to the top block
+    /// </summary>
+    /// <param name="pos">the y position camera will lerp to</param>
+    public IEnumerator LerpCameraAngle()
+    {
+        yield return new WaitForEndOfFrame();
+
+        Vector3 lerpBlockPosition = new Vector3(gameVariables.CurrentCube.transform.position.x,
+            gameVariables.CurrentCube.transform.position.y - 15.0f,
+            gameVariables.CurrentCube.transform.position.z);
+
+        Camera.main.transform.rotation = Quaternion.LookRotation((((lerpBlockPosition - Camera.main.transform.position).normalized * 0.0225f) + (Camera.main.transform.forward)) / 2.0f, Camera.main.transform.up);
+
+        if (Vector3.Distance((gameVariables.CurrentCube.transform.position - Camera.main.transform.position).normalized, (Camera.main.transform.forward)) < 0.065f)
+        {
+            newLerpAngle = false;
+        }
+        else
+        {
+            StartCoroutine(nameof(LerpCameraAngle));
         }
     }
 }

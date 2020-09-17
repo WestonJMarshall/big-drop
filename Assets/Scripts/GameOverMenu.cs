@@ -31,7 +31,7 @@ public class GameOverMenu : MonoBehaviour
     {
         scoreText.text = "Score: " + GameManager.Instance.gameVariables.CompletedBlockCount.ToString();
         gameOverMenuUI.SetActive(true);
-        GameManager.gameVariables.GameState = 1;
+        GameManager.gameVariables.GameState = 2;
     }
 
     public void RestartDelay()
@@ -43,8 +43,8 @@ public class GameOverMenu : MonoBehaviour
     private void Restart()
     {
         Debug.Log("restart");
+        GameManager.Instance.ResetVariables();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        GameManager.SpawnCube();
     }
 
     public void Exit()
