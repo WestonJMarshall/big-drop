@@ -24,6 +24,7 @@ public class GameOverMenu : MonoBehaviour
         if (GameManager.gameVariables.GameState == 2)
         {
             GameOver();
+            PauseMenu.IsGamePaused = false;
         }
     }
 

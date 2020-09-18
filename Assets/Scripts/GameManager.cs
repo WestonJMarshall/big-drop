@@ -71,9 +71,7 @@ public class GameManager : MonoBehaviour
                 gameVariables.CurrentCube.mouseEffect.SetActive(true);
                 if (Input.GetMouseButtonDown(0))
                 {
-                    gameVariables.CurrentCube.Falling = false;
-                    gameVariables.CurrentCube.GetComponentInChildren<Rigidbody>().drag = 0.2f;
-                    gameVariables.CurrentCube.ParachuteFlyAway();
+                    DropCube();
                 }
             }
             else
@@ -84,6 +82,11 @@ public class GameManager : MonoBehaviour
         else
         {
             gameVariables.CurrentCube.mouseEffect.SetActive(false);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            DropCube();
         }
 
         //Only run special cube movement on current cube
@@ -145,7 +148,6 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void GameOver(object sender, System.EventArgs e)
     {
-        Debug.Log("Game Over");
         music.GetComponent<Music>().ChangePitch(1.0f);
         gameVariables.GameState = 2;
 
@@ -226,5 +228,12 @@ public class GameManager : MonoBehaviour
         {
             StartCoroutine(nameof(LerpCameraAngle));
         }
+    }
+
+    private void DropCube()
+    {
+        gameVariables.CurrentCube.Falling = false;
+        gameVariables.CurrentCube.GetComponentInChildren<Rigidbody>().drag = 0.2f;
+        gameVariables.CurrentCube.ParachuteFlyAway();
     }
 }

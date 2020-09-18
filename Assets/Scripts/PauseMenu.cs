@@ -19,16 +19,20 @@ public class PauseMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //escape key and 'P' are set to pause the game
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
+        //stops overlay of both game over and pause UIs
+        if (GameManager.gameVariables.GameState != 2)
         {
-            if (IsGamePaused)
+            //escape key and 'P' are set to pause the game
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
             {
-                Resume();
-            }
-            else
-            {
-                Pause();
+                if (IsGamePaused)
+                {
+                    Resume();
+                }
+                else
+                {
+                    Pause();
+                }
             }
         }
     }
@@ -55,7 +59,6 @@ public class PauseMenu : MonoBehaviour
     {
         Restart();
         Debug.Log("delay");
-        //Invoke("Restart", restartDelay);
     }
 
     private void Restart()
