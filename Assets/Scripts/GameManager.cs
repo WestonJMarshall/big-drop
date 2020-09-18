@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
     public Material sharedCubeMaterial;
 
     private GameObject scoreCanvas;
+    public GameObject music;
 
     private void Awake()
     {
@@ -47,6 +48,7 @@ public class GameManager : MonoBehaviour
     private void StartScene(Scene scene, LoadSceneMode mode)
     {
         ResetVariables();
+        music = GameObject.FindGameObjectWithTag("Music");
         scoreCanvas = GameObject.FindGameObjectWithTag("ScoreCanvas");
         scoreCanvas.GetComponentInChildren<TMP_Text>().text = $"Score: <color=#{ColorUtility.ToHtmlStringRGB(sharedCubeMaterial.color)}>{gameVariables.CompletedBlockCount}</color>";
         SpawnCube();
@@ -71,6 +73,7 @@ public class GameManager : MonoBehaviour
                 {
                     gameVariables.CurrentCube.Falling = false;
                     gameVariables.CurrentCube.GetComponentInChildren<Rigidbody>().drag = 0.2f;
+                    gameVariables.CurrentCube.ParachuteFlyAway();
                 }
             }
             else
@@ -124,6 +127,7 @@ public class GameManager : MonoBehaviour
         gameVariables.CompletedBlockCount += 1;
         scoreCanvas.GetComponentInChildren<TMP_Text>().text = $"Score: <color=#{ColorUtility.ToHtmlStringRGB(sharedCubeMaterial.color)}>{gameVariables.CompletedBlockCount}</color>";
         Debug.Log(gameVariables.CompletedBlockCount);
+        music.GetComponent<Music>().ChangePitch((gameVariables.CompletedBlockCount / 40f) + 1.0f);
 
         gameVariables.CurrentCube.mouseEffect.SetActive(false);
 
@@ -142,7 +146,7 @@ public class GameManager : MonoBehaviour
     private void GameOver(object sender, System.EventArgs e)
     {
         Debug.Log("Game Over");
-
+        music.GetComponent<Music>().ChangePitch(1.0f);
         gameVariables.GameState = 2;
 
         newLerpY = true;

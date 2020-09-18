@@ -9,6 +9,7 @@ public class DropCube : MonoBehaviour
     public event EventHandler OnBlockRested;
     public event EventHandler OnFailure;
 
+    public GameObject parachute;
     public GameObject mouseEffect;
 
     #region Private Variables
@@ -98,6 +99,7 @@ public class DropCube : MonoBehaviour
     public void BlockRested()
     {
         OnBlockRested?.Invoke(this, null);
+        if (parachute && !parachute.GetComponent<Parachute>().flyAway) ParachuteFlyAway();
         StopAllCoroutines();
     }
 
@@ -153,5 +155,10 @@ public class DropCube : MonoBehaviour
         {
             StartCoroutine(nameof(LerpColorChange), new Tuple<float, int>(HsvData()[0] + 0.04f, changeData.Item2 + 1));
         }
+    }
+
+    public void ParachuteFlyAway()
+    {
+        parachute.GetComponent<Parachute>().flyAway = true;
     }
 }
